@@ -8,6 +8,11 @@ from django.views.decorators.http import require_POST
 import uuid
 from django.db import transaction
 from django.core.paginator import Paginator
+from django.http import HttpResponse
+
+
+def home(request):
+    return HttpResponse("E-commerce API is live!")
 
 
 def product_list(request):
