@@ -1,0 +1,155 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+  <h2 class="mb-4">Your Cart</h2>
+
+  {% for item in cart_items %}
+  <div class="card mb-3 shadow-sm" id="item-{{ item.id }}">
+    <div class="card-body d-flex justify-content-between align-items-center">
+      
+    <div>
+      <h5>{{ item.product.name }}</h5>
+      <p class="mb-1">Price: <span data-price-{{ item.id }}>{{ item.product.price }}</span> Birr</p>
+      <p>Quantity: <span id="qty-{{ item.id }}">{{ item.quantity }}</span></p>
+    </div>
+
+      <div>
+        <button class="btn btn-success btn-sm" onclick="increase({{ item.id }})">+</button>
+        <button class="btn btn-warning btn-sm" onclick="decrease({{ item.id }})">-</button>
+        <button class="btn btn-danger btn-sm" onclick="removeItem({{ item.id }})">Remove</button>
+      </div>
+
+    </div>
+  </div>
+  {% endfor %}
+
+  <h4>Total: {{ total }} Birr</h4>
+
+  <a href="{% url 'checkout' %}" class="btn btn-primary mt-3">Checkout</a>
+</div>
+
+<script>
+function getCSRFToken() {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, 10) === ('csrftoken' + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(10));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+function updateTotal() {
+    // Recalculate total from all items
+    let total = 0;
+    document.querySelectorAll('[id^="qty-"]').forEach((qtySpan) => {
+        const itemId = qtySpan.id.split('-')[1];
+        const priceSpan = document.querySelector(`[data-price-${itemId}]`);
+        if (priceSpan) {
+            total += parseFloat(priceSpan.innerText) * parseInt(qtySpan.innerText);
+        }
+    });
+    const totalElement = document.querySelector('h4');
+    if (totalElement) {
+        totalElement.innerHTML = `Total: ${total.toFixed(2)} Birr`;
+    }
+}
+
+function increase(id) {
+    fetch(`/increase/${id}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCSRFToken(),
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.quantity) {
+            document.getElementById(`qty-${id}`).innerText = data.quantity;
+            updateTotal();
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+}
+
+function decrease(id) {
+    fetch(`/decrease/${id}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCSRFToken(),
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.deleted) {
+            // Remove the entire cart item card
+            const itemCard = document.getElementById(`item-${id}`);
+            if (itemCard) {
+                itemCard.remove();
+            }
+            updateTotal();
+        } else if (data.quantity) {
+            document.getElementById(`qty-${id}`).innerText = data.quantity;
+            updateTotal();
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+}
+
+function removeItem(id) {
+    fetch(`/remove/${id}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCSRFToken(),
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.deleted) {
+            // Remove the entire cart item card
+            const itemCard = document.getElementById(`item-${id}`);
+            if (itemCard) {
+                itemCard.remove();
+            }
+            updateTotal();
+            
+            // Check if cart is empty and show message
+            const remainingItems = document.querySelectorAll('[id^="item-"]');
+            if (remainingItems.length === 0) {
+                const container = document.querySelector('.container');
+                if (container) {
+                    // Remove existing empty cart message if any
+                    const existingMessage = document.querySelector('.empty-cart-message');
+                    if (existingMessage) existingMessage.remove();
+                    
+                    // Create empty cart message
+                    const emptyMessage = document.createElement('div');
+                    emptyMessage.className = 'alert alert-info empty-cart-message';
+                    emptyMessage.innerHTML = 'Your cart is empty. <a href="{% url "product_list" %}" class="alert-link">Continue shopping</a>';
+                    container.insertBefore(emptyMessage, container.firstChild);
+                    
+                    // Hide the checkout button
+                    const checkoutBtn = document.querySelector('.btn-primary');
+                    if (checkoutBtn) checkoutBtn.style.display = 'none';
+                }
+            }
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+}
+</script>
+{% endblock %}

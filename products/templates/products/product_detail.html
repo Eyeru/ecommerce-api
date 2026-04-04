@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-6">
+            {% if product.image %}
+                <img src="{{ product.image.url }}" class="img-fluid rounded shadow" alt="{{ product.name }}">
+            {% else %}
+                <div class="bg-light rounded p-5 text-center">
+                    <p class="text-muted">No image available</p>
+                </div>
+            {% endif %}
+        </div>
+        
+        <div class="col-md-6">
+            <h2>{{ product.name }}</h2>
+            <p class="text-muted">Category: {{ product.category.name }}</p>
+            <p class="price">{{ product.price }} Birr</p>
+            
+            {% if product.stock > 0 %}
+                <p class="text-success">In Stock: {{ product.stock }} units available</p>
+                <a href="{% url 'add_to_cart' product.id %}" class="btn btn-success btn-lg">Add to Cart</a>
+            {% else %}
+                <p class="text-danger">Out of Stock</p>
+                <button class="btn btn-secondary btn-lg" disabled>Out of Stock</button>
+            {% endif %}
+            
+            <a href="{% url 'product_list' %}" class="btn btn-outline-secondary btn-lg ms-2">Back to products</a>
+            
+            <hr class="my-4">
+            
+            <h5>Description</h5>
+            <p>{{ product.description|default:"No description available." }}</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="text-center">
+        <div class="mb-4">
+            <svg width="80" height="80" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" fill="#28a745"/>
+            </svg>
+        </div>
+        <h2 class="text-success mb-3">Order Successful! 🎉</h2>
+        <p class="lead">Thank you for your purchase!</p>
+        <p>Your order ID: <strong>#{{ order.id }}</strong></p>
+        
+        <div class="card mt-4 mx-auto" style="max-width: 500px;">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Order Summary</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    {% for item in order.items.all %}
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span>{{ item.product.name }} x {{ item.quantity }}</span>
+                            <span>{{ item.price }} Birr</span>
+                        </li>
+                    {% endfor %}
+                    <li class="list-group-item d-flex justify-content-between fw-bold">
+                        <span>Total</span>
+                        <span>{{ order.total_price }} Birr</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="mt-4">
+            <a href="{% url 'product_list' %}" class="btn btn-primary">Continue Shopping</a>
+            <a href="{% url 'order_detail' order.id %}" class="btn btn-outline-secondary ms-2">View Order Details</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

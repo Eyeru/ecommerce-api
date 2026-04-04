@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<!-- 🔍 SEARCH + FILTER -->
+<form method="GET" class="row g-2 mb-4">
+
+    <div class="col-md-6">
+        <input type="text"
+               name="q"
+               value="{{ request.GET.q }}"
+               placeholder="Search products..."
+               class="form-control">
+    </div>
+
+    <div class="col-md-4">
+        <select name="category" class="form-select">
+            <option value="">All Categories</option>
+
+            {% for cat in categories %}
+                <option value="{{ cat.id }}"
+                    {% if request.GET.category == cat.id|stringformat:"s" %}selected{% endif %}>
+                    {{ cat.name }}
+                </option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="col-md-2">
+        <button class="btn btn-primary w-100">Search</button>
+    </div>
+
+</form>
+
+<!-- 🧾 TITLE -->
+<h5 class="mb-4">
+    {% if request.GET.q %}
+        Results for "{{ request.GET.q }}"
+    {% else %}
+        All Products
+    {% endif %}
+</h5>
+
+<!-- 🛍 PRODUCT GRID -->
+<div class="row">
+    {% for product in products %}
+    <div class="col-md-4 col-lg-3 mb-4">
+
+        <div class="card h-100">
+
+            {% if product.image %}
+            <img src="{{ product.image.url }}"
+                 class="card-img-top"
+                 style="height:200px; object-fit:cover;">
+            {% else %}
+            <div style="height:200px; background:#eee;"></div>
+            {% endif %}
+
+            <div class="card-body d-flex flex-column">
+
+                <small class="text-muted mb-1">
+                    {{ product.category.name }}
+                </small>
+
+                <h6 class="card-title">
+                    <a href="{% url 'product_detail' product.id %}"
+                       class="text-decoration-none text-dark">
+                        {{ product.name }}
+                    </a>
+                </h6>
+
+                <p class="text-muted small">
+                    {{ product.description|truncatewords:10 }}
+                </p>
+
+                <div class="price mt-auto mb-2">
+                    {{ product.price }} Birr
+                </div>
+
+                <div class="d-grid gap-2">
+                    <a href="{% url 'add_to_cart' product.id %}"
+                       class="btn btn-success btn-sm">
+                        Add to Cart
+                    </a>
+
+                    <a href="{% url 'product_detail' product.id %}"
+                       class="btn btn-outline-secondary btn-sm">
+                        View Details
+                    </a>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    {% empty %}
+        <p>No products found.</p>
+    {% endfor %}
+</div>
+
+<!-- 📄 PAGINATION -->
+<nav>
+    <ul class="pagination justify-content-center">
+
+        {% if products.has_previous %}
+        <li class="page-item">
+            <a class="page-link"
+               href="?q={{ request.GET.q }}&category={{ request.GET.category }}&page={{ products.previous_page_number }}">
+               Previous
+            </a>
+        </li>
+        {% endif %}
+
+        <li class="page-item active">
+            <span class="page-link">
+                Page {{ products.number }} of {{ products.paginator.num_pages }}
+            </span>
+        </li>
+
+        {% if products.has_next %}
+        <li class="page-item">
+            <a class="page-link"
+               href="?q={{ request.GET.q }}&category={{ request.GET.category }}&page={{ products.next_page_number }}">
+               Next
+            </a>
+        </li>
+        {% endif %}
+
+    </ul>
+</nav>
+
+{% endblock %}
