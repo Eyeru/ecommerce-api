@@ -29,11 +29,6 @@ def product_list(request):
     if category_id:
         product_list = product_list.filter(category_id=category_id)
 
-    # API JSON response
-    if request.GET.get('format') == 'json':
-        data = list(product_list.values('id', 'name', 'price', 'stock', 'category__name'))
-        return JsonResponse({'products': data}, safe=False)
-
     paginator = Paginator(product_list, 6)
     page_number = request.GET.get('page')
     products = paginator.get_page(page_number)
