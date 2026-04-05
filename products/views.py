@@ -8,36 +8,10 @@ from django.views.decorators.http import require_POST
 import uuid
 from django.db import transaction
 from django.core.paginator import Paginator
-import logging
 
-logger = logging.getLogger(__name__)
 
-# Health check / root
-def home(request):
-    return HttpResponse("E-commerce API is live!")
-
-# Product listing
 def product_list(request):
-    query = request.GET.get('q')
-    category_id = request.GET.get('category')
-
-    # Add order_by to avoid pagination crash
-    product_list = Product.objects.all().select_related('category').order_by('id')
-
-    if query:
-        product_list = product_list.filter(name__icontains=query)
-    if category_id:
-        product_list = product_list.filter(category_id=category_id)
-
-    paginator = Paginator(product_list, 6)
-    page_number = request.GET.get('page')
-    products = paginator.get_page(page_number)
-    categories = Category.objects.all()
-
-    return render(request, 'products/product_list.html', {
-        'products': products,
-        'categories': categories
-    })
+    return HttpResponse("SITE WORKING")
 
 def product_detail(request, id):
     product = get_object_or_404(Product, id=id)
