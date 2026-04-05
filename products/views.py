@@ -11,7 +11,7 @@ from django.core.paginator import Paginator
 
 
 def product_list(request):
-    return HttpResponse("SITE WORKING")
+    return render(request, 'products/product_list.html')
 
 def product_detail(request, id):
     product = get_object_or_404(Product, id=id)
